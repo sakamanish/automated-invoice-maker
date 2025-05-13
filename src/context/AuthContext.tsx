@@ -55,11 +55,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setIsLoading(true);
       
-      // Demo admin credentials (in production, this should be handled securely via Supabase)
-      if (email === 'admin@example.com' && password === 'admin123') {
+      // Updated admin credentials
+      if (email === 'admin@gmail.com' && password === 'Alliswell') {
         const adminUser: User = {
           id: '1',
-          email: 'admin@example.com',
+          email: 'admin@gmail.com',
           role: 'admin',
           created_at: new Date().toISOString(),
         };

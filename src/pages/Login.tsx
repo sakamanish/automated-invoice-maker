@@ -99,7 +99,7 @@ const Login = () => {
           </Form>
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-gray-500">
-          <p>Demo credentials: admin@example.com / admin123</p>
+          <p>Demo credentials: admin@gmail.com / Alliswell</p>
         </CardFooter>
       </Card>
     </div>
