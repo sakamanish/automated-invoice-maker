@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
@@ -29,18 +29,19 @@ const Login = () => {
   });
 
   // Redirect if already logged in
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       if (user.role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate('/employee/dashboard');
+        navigate('/employee/dashboard', { replace: true });
       }
     }
   }, [user, navigate]);
 
   const onSubmit = async (values: FormValues) => {
     await login(values.email, values.password);
+    // The redirection is handled in the useEffect above after user state is updated
   };
 
   return (
@@ -98,9 +99,6 @@ const Login = () => {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center text-sm text-gray-500">
-          <p>Demo credentials: admin@gmail.com / Alliswell</p>
-        </CardFooter>
       </Card>
     </div>
   );

@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             setUser({
               id: userData.id,
               email: userData.email,
-              role: userData.role,
+              role: userData.role as 'admin' | 'employee',
               created_at: userData.created_at
             });
           } else if (error) {
@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               setUser({
                 id: userData.id,
                 email: userData.email,
-                role: userData.role,
+                role: userData.role as 'admin' | 'employee',
                 created_at: userData.created_at
               });
             }
