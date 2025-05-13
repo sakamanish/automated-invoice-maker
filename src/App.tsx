@@ -29,19 +29,6 @@ import AllInvoices from "./pages/admin/AllInvoices";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Initialize localStorage with demo data if empty
-  React.useEffect(() => {
-    if (!localStorage.getItem('employees')) {
-      localStorage.setItem('employees', JSON.stringify([]));
-    }
-    if (!localStorage.getItem('invoices')) {
-      localStorage.setItem('invoices', JSON.stringify([]));
-    }
-    if (!localStorage.getItem('messages')) {
-      localStorage.setItem('messages', JSON.stringify([]));
-    }
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

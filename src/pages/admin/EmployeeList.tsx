@@ -6,18 +6,43 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { UserPlus, User, MessageSquare } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // In production, this would be a Supabase query
-    // For demo, we're using localStorage
-    const storedEmployees = localStorage.getItem('employees');
-    if (storedEmployees) {
-      const parsedEmployees = JSON.parse(storedEmployees);
-      setEmployees(parsedEmployees);
-    }
+    const fetchEmployees = async () => {
+      try {
+        setIsLoading(true);
+        
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('role', 'employee');
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          setEmployees(data as Employee[]);
+        }
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load employees',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchEmployees();
   }, []);
 
   return (
@@ -37,7 +62,11 @@ const EmployeeList = () => {
           <CardTitle className="text-lg text-business-700">All Employees</CardTitle>
         </CardHeader>
         <CardContent>
-          {employees.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-business-500 border-t-transparent"></div>
+            </div>
+          ) : employees.length === 0 ? (
             <div className="py-8 text-center">
               <User className="mx-auto mb-4 h-12 w-12 text-business-300" />
               <h3 className="mb-1 text-lg font-medium text-business-700">No employees yet</h3>

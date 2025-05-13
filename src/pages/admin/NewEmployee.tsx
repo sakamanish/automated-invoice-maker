@@ -4,16 +4,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Employee } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -26,6 +26,7 @@ const NewEmployee = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
+      password: 'password123', // Default password
     },
   });
 
@@ -33,17 +34,13 @@ const NewEmployee = () => {
     try {
       setIsSubmitting(true);
       
-      // In production, this would create a user in Supabase Auth
-      // For demo, we'll use localStorage
-      
-      // Check if email is already used
-      const storedEmployees = localStorage.getItem('employees');
-      const employees = storedEmployees ? JSON.parse(storedEmployees) : [];
-      const emailExists = employees.some(
-        (emp: Employee) => emp.email === formData.email
-      );
-      
-      if (emailExists) {
+      // Check if email already exists
+      const { data: existingUsers } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', formData.email);
+        
+      if (existingUsers && existingUsers.length > 0) {
         toast({
           title: 'Error',
           description: 'An employee with this email already exists',
@@ -52,25 +49,43 @@ const NewEmployee = () => {
         return;
       }
       
-      // Create new employee
-      const newEmployee: Employee = {
-        id: uuidv4(),
+      // Create new user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
-        role: 'employee',
-        created_at: new Date().toISOString(),
-      };
+        password: formData.password,
+        options: {
+          data: {
+            role: 'employee'
+          }
+        }
+      });
       
-      // Save to localStorage
-      employees.push(newEmployee);
-      localStorage.setItem('employees', JSON.stringify(employees));
+      if (authError) throw authError;
+      
+      if (!authData.user) {
+        throw new Error('Failed to create user');
+      }
+      
+      // User creation should trigger our database function to create the user record
+      // But we'll manually insert it as well to be sure
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          email: formData.email,
+          role: 'employee'
+        });
+        
+      if (insertError) {
+        console.error('Error creating user record:', insertError);
+        // Not throwing here as the trigger might have already created the record
+      }
       
       toast({
         title: 'Employee created',
         description: `Employee account for ${formData.email} has been created`,
       });
       
-      // In a real app, we'd send an email to the user with instructions
-      // For demo, just show the default password
       toast({
         title: 'Default password set',
         description: 'Default password is: password123',
@@ -81,7 +96,7 @@ const NewEmployee = () => {
       console.error('Error creating employee:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create employee',
+        description: error instanceof Error ? error.message : 'Failed to create employee',
         variant: 'destructive',
       });
     } finally {
@@ -113,9 +128,22 @@ const NewEmployee = () => {
                   </FormItem>
                 )}
               />
-              <p className="text-sm text-business-500">
-                The employee will receive an account with a default password that they can change later.
-              </p>
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="text" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    <p className="text-sm text-business-500">
+                      This is the initial password. The employee can change it later.
+                    </p>
+                  </FormItem>
+                )}
+              />
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button

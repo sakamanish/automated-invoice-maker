@@ -45,8 +45,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ requiredRole }
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+    <div className="flex h-screen w-full bg-gray-50">
+      <SidebarProvider>
         <Sidebar className="border-r">
           <SidebarHeader className="px-4 py-6">
             <h1 className="text-xl font-bold text-business-800">
@@ -87,7 +87,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ requiredRole }
         <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </div>
   );
 };

@@ -9,7 +9,142 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      invoice_items: {
+        Row: {
+          amount: number
+          id: string
+          invoice_id: string
+          name: string
+          quantity: number
+          rate: number
+        }
+        Insert: {
+          amount: number
+          id?: string
+          invoice_id: string
+          name: string
+          quantity: number
+          rate: number
+        }
+        Update: {
+          amount?: number
+          id?: string
+          invoice_id?: string
+          name?: string
+          quantity?: number
+          rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          customer_gst: string
+          customer_name: string
+          employee_id: string
+          id: string
+          invoice_date: string
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string
+          customer_gst: string
+          customer_name: string
+          employee_id: string
+          id?: string
+          invoice_date: string
+          total_amount: number
+        }
+        Update: {
+          created_at?: string
+          customer_gst?: string
+          customer_name?: string
+          employee_id?: string
+          id?: string
+          invoice_date?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          from_id: string
+          id: string
+          read: boolean
+          to_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          from_id: string
+          id?: string
+          read?: boolean
+          to_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          from_id?: string
+          id?: string
+          read?: boolean
+          to_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_from_id_fkey"
+            columns: ["from_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_to_id_fkey"
+            columns: ["to_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          role: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
